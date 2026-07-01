@@ -16,8 +16,7 @@ print("=== CUSTOMERS ===")
 print(type(data))
 print(json.dumps(data[0], indent=2))
 
-# orders
 # print("\n=== ORDERS ===")
-# df = pd.read_csv('/Users/bohan/Downloads/novacart_project/delta-lakehouse-pipeline/data/landing/orders/orders.csv')
-# print(df.columns.tolist())
-# print(df.head())
+df = pd.read_csv('/Users/bohan/Downloads/novacart_project/delta-lakehouse-pipeline/data/landing/orders/orders_2025-11-10.csv')
+print(df.columns.tolist())
+print(df.head())
