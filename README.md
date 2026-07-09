@@ -1,1 +1,1 @@
-# delta-lakehouse-pipeline
+# novacart-pipeline
