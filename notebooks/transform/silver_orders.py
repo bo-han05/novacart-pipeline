@@ -1,14 +1,17 @@
 # Silver Layer: Orders
 
-%run /Workspace/repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
+%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
 
 from pyspark.sql.functions import col, when, concat_ws, lit, row_number, current_date, round as spark_round
 from pyspark.sql.window import Window
+import uuid
 
 VALID_STATUSES = {"pending", "shipped", "delivered", "refunded"}
 
-bronze_orders = spark.table("bronze_orders")
+run_id = str(uuid.uuid4())
 start_time = log_step_start(run_id, "silver_orders")
+
+bronze_orders = spark.table("bronze_orders")
 
 # ---- Deduplicate: keep latest ingestion per order_id ----
 window = Window.partitionBy("order_id").orderBy(col("ingestion_ts").desc())

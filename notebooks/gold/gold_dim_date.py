@@ -1,6 +1,12 @@
 # Gold Layer: dim_date
 
+%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
+
 from pyspark.sql.functions import col, explode, sequence, to_date, year, month, dayofmonth, weekofyear, quarter, dayofweek, date_format
+import uuid
+
+run_id = str(uuid.uuid4())
+start_time = log_step_start(run_id, "gold_dim_date")
 
 date_range = spark.sql("""
     SELECT min(order_date) as min_date, max(order_date) as max_date FROM silver_orders
@@ -18,4 +24,13 @@ dim_date = (
 )
 
 dim_date.write.format("delta").mode("overwrite").saveAsTable("dim_date")
-print(f"dim_date rows: {dim_date.count()}")
+row_count_out = dim_date.count()
+print(f"dim_date rows: {row_count_out}")
+
+# ---- End logging ----
+log_step_end(
+    run_id, "gold_dim_date", start_time,
+    row_count_in=row_count_out,
+    row_count_out=row_count_out,
+    quarantined_count=0
+)

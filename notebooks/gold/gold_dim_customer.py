@@ -1,7 +1,13 @@
 # Gold Layer: dim_customer (SCD2)
 
+%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
+
 from delta.tables import DeltaTable
 from pyspark.sql.functions import col, lit, current_timestamp
+import uuid
+
+run_id = str(uuid.uuid4())
+start_time = log_step_start(run_id, "gold_dim_customer")
 
 silver_customers = spark.table("silver_customers")
 
@@ -16,7 +22,8 @@ if not spark.catalog.tableExists("dim_customer"):
         .withColumn("is_current", lit(True))
     )
     dim_customer.write.format("delta").saveAsTable("dim_customer")
-    print(f"dim_customer created: {dim_customer.count()} rows")
+    row_count_out = dim_customer.count()
+    print(f"dim_customer created: {row_count_out} rows")
 else:
     target = DeltaTable.forName(spark, "dim_customer")
     current_rows = target.toDF().filter(col("is_current") == True)
@@ -55,4 +62,13 @@ else:
     )
 
     to_insert.write.format("delta").mode("append").saveAsTable("dim_customer")
-    print(f"dim_customer updated. New/changed rows inserted: {to_insert.count()}")
+    row_count_out = to_insert.count()
+    print(f"dim_customer updated. New/changed rows inserted: {row_count_out}")
+
+# ---- End logging ----
+log_step_end(
+    run_id, "gold_dim_customer", start_time,
+    row_count_in=silver_customers.count(),
+    row_count_out=row_count_out,
+    quarantined_count=0
+)

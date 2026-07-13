@@ -1,9 +1,15 @@
 # Silver Layer: Customers
 
+%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
+
 from pyspark.sql.functions import col, when, concat_ws, lit, row_number, current_date
 from pyspark.sql.window import Window
+import uuid
 
 VALID_TIERS = {"standard", "silver", "gold"}
+
+run_id = str(uuid.uuid4())
+start_time = log_step_start(run_id, "silver_customers")
 
 bronze_customers = spark.table("bronze_customers")
 
@@ -46,5 +52,16 @@ bad_customers = validated.filter(col("quarantine_reason") != "")
 good_customers.drop("quarantine_reason").write.format("delta").mode("overwrite").saveAsTable("silver_customers")
 bad_customers.write.format("delta").mode("overwrite").saveAsTable("quarantine_customers")
 
-print(f"Silver customers (valid): {good_customers.count()}")
-print(f"Quarantined customers: {bad_customers.count()}")
+row_count_out = good_customers.count()
+quarantined_count = bad_customers.count()
+
+print(f"Silver customers (valid): {row_count_out}")
+print(f"Quarantined customers: {quarantined_count}")
+
+# ---- End logging ----
+log_step_end(
+    run_id, "silver_customers", start_time,
+    row_count_in=bronze_customers.count(),
+    row_count_out=row_count_out,
+    quarantined_count=quarantined_count
+)
