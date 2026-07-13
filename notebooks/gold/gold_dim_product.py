@@ -16,6 +16,7 @@ else:
     (
         target.alias("t")
         .merge(silver_products.alias("s"), "t.product_id = s.product_id")
+        # if product already exists -> overwrite its attributes with latest values
         .whenMatchedUpdate(set={
             "name": "s.name",
             "category": "s.category",
@@ -23,6 +24,7 @@ else:
             "supplier_id": "s.supplier_id",
             "updated_at": "s.updated_at"
         })
+        # if product is new -> insert it as a new row
         .whenNotMatchedInsert(values={
             "product_id": "s.product_id",
             "name": "s.name",
