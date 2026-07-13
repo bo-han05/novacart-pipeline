@@ -1,6 +1,6 @@
 # Silver Layer: Orders
 
-from pyspark.sql.functions import col, current_timestamp, lit, row_number
+from pyspark.sql.functions import col, when, concat_ws, lit, row_number, current_date, round as spark_round
 from pyspark.sql.window import Window
 
 VALID_STATUSES = {"pending", "shipped", "delivered", "refunded"}
@@ -16,27 +16,18 @@ deduped = (
     .drop("rn")
 )
 
-# ---- Validation flags ----
-validated = (
-    deduped
-    .withColumn("total_amount", col("quantity") * col("unit_price"))
-    .withColumn(
-        "quarantine_reason",
-        col("order_id").isNull().cast("string")
-    )
-)
+# ---- Derived column ----
+deduped = deduped.withColumn("total_amount", spark_round(col("quantity") * col("unit_price"), 2))
 
-# Build reason column properly
-from pyspark.sql.functions import when, concat_ws
-
-validated = deduped.withColumn("total_amount", col("quantity") * col("unit_price"))
-
-validated = validated.withColumn(
+# ---- Validation ----
+validated = deduped.withColumn(
     "quarantine_reason",
     concat_ws("; ",
         when(col("order_id").isNull(), lit("missing_order_id")),
         when(col("customer_id").isNull(), lit("missing_customer_id")),
         when(col("product_id").isNull(), lit("missing_product_id")),
+        when(col("order_date").isNull(), lit("missing_order_date")),
+        when(col("order_date") > current_date(), lit("future_order_date")),
         when(col("quantity") <= 0, lit("invalid_quantity")),
         when(col("unit_price") < 0, lit("negative_unit_price")),
         when(~col("status").isin(list(VALID_STATUSES)), lit("invalid_status"))
@@ -46,13 +37,8 @@ validated = validated.withColumn(
 good_orders = validated.filter(col("quarantine_reason") == "")
 bad_orders = validated.filter(col("quarantine_reason") != "")
 
-# ---- Write Silver ----
 good_orders.drop("quarantine_reason").write.format("delta").mode("overwrite").saveAsTable("silver_orders")
-
-# ---- Write Quarantine ----
-bad_orders.write.format("delta").mode("append").saveAsTable("quarantine_orders")
+bad_orders.write.format("delta").mode("overwrite").saveAsTable("quarantine_orders")
 
 print(f"Silver orders (valid): {good_orders.count()}")
 print(f"Quarantined orders: {bad_orders.count()}")
-
-bad_orders.select("order_id", "customer_id", "quantity", "unit_price", "status", "quarantine_reason").show(truncate=False)
