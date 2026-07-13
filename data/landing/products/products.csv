@@ -1,5 +1,5 @@
 product_id,name,category,unit_cost,supplier_id,updated_at
-PROD-001,Wireless Headphones,Electronics,22.5,SUP-A,2025-10-01T10:00:00
+PROD-001,Wireless Headphones,Electronics,23.5,SUP-A,2025-12-01T10:00:00
 PROD-002,Laptop Stand,Accessories,8.75,SUP-B,2025-10-15T14:30:00
 PROD-003,USB-C Hub,Electronics,12.0,SUP-A,2025-11-01T09:00:00
 PROD-004,Webcam HD,Electronics,35.0,SUP-C,2025-11-05T11:15:00

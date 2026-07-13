@@ -48,7 +48,7 @@ print(f"Bronze orders: {orders_df.count()} rows")
 # products_df.write.format("delta").mode("append").saveAsTable("bronze_products")
 # print(f"Bronze products: {products_df.count()} rows")
 
-# print(f"\nRun ID: {run_id}")
+print(f"\nRun ID: {run_id}")
 
 # ---------- PRODUCTS (Incremental) ----------
 # Get last successful watermark for products
@@ -60,14 +60,14 @@ watermark_row = spark.sql("""
 
 last_watermark = watermark_row[0]["last_watermark"] if watermark_row else "1900-01-01T00:00:00"
 
-print(f"Last watermark for products: {last_watermark}")
+print(f"\nLast watermark for products: {last_watermark}")
 
 # Read full source, then filter to only changed rows
 products_source = (
     spark.read
     .option("header", True)
     .option("inferSchema", True)
-    .csv(f"{BASE_PATH}/products.csv")
+    .csv(f"{BASE_PATH}/products/products.csv")
 )
 
 products_df = (
@@ -95,11 +95,7 @@ if new_row_count > 0:
 else:
     print("No new products to ingest — watermark unchanged")
 
-## Verify tables landed in bronze layer correctly
-print("Customers:", spark.table("bronze_customers").count())
+# Verify tables landed in bronze layer correctly
+print("\nCustomers:", spark.table("bronze_customers").count())
 print("Orders:", spark.table("bronze_orders").count())
 print("Products:", spark.table("bronze_products").count())
-
-spark.table("bronze_customers").show(5)
-spark.table("bronze_orders").show(5)
-spark.table("bronze_products").show(5)
