@@ -10,13 +10,13 @@ pipeline_run_id = str(uuid.uuid4())
 start_pipeline_run(pipeline_run_id)
 print(f"Pipeline Run Starting - Run ID: {pipeline_run_id}")
 
-print("--- STAGE 1: BRONZE INGESTION ---")
+print("\n--- STAGE 1: BRONZE INGESTION ---")
 %run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/ingestion/bronze_ingestion
-print("--- STAGE 2: SILVER TRANSFORMATION ---")
+print("\n--- STAGE 2: SILVER TRANSFORMATION ---")
 %run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_orders
 %run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_customers
 %run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_products
-print("--- STAGE 3: GOLD LAYER ---")
+print("\n--- STAGE 3: GOLD LAYER ---")
 %run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_date
 %run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_product
 %run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_customer
