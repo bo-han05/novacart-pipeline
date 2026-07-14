@@ -1,6 +1,6 @@
 # Gold Layer: dim_product (SCD1)
 
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper.py").read())
 
 from delta.tables import DeltaTable
 from pyspark.sql.functions import col

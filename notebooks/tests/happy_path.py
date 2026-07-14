@@ -1,14 +1,14 @@
 # Test: Happy Path
 # Verifies clean pipeline run produces expected row counts
 
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/ingestion/bronze_ingestion
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_orders
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_customers
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_products
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_date
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_product
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_customer
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_fact_orders
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/ingestion/bronze_ingestion.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_orders.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_customers.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/transform/silver_products.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_date.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_product.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_dim_customer.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/gold/gold_fact_orders.py").read())
 
 def test_happy_path():
     assert spark.table("bronze_orders").count() > 0, "Bronze orders should have data"

@@ -1,6 +1,6 @@
 # Gold Layer: dim_date
 
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper.py").read())
 
 from pyspark.sql.functions import col, explode, sequence, to_date, year, month, dayofmonth, weekofyear, quarter, dayofweek, date_format
 import uuid

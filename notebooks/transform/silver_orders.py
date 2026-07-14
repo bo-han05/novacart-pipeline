@@ -1,6 +1,6 @@
 # Silver Layer: Orders
 
-%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper.py").read())
 
 from pyspark.sql.functions import col, when, concat_ws, lit, row_number, current_date, round as spark_round
 from pyspark.sql.window import Window
