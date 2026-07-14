@@ -23,7 +23,7 @@ dim_date = (
     .withColumn("day_of_week", dayofweek(col("full_date")))
 )
 
-dim_date.write.format("delta").mode("overwrite").saveAsTable("dim_date")
+dim_date.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("dim_date")
 row_count_out = dim_date.count()
 print(f"dim_date rows: {row_count_out}")
 

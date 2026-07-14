@@ -54,8 +54,8 @@ validated = flattened.withColumn(
 good_customers = validated.filter(col("quarantine_reason") == "")
 bad_customers = validated.filter(col("quarantine_reason") != "")
 
-good_customers.drop("quarantine_reason").write.format("delta").mode("overwrite").saveAsTable("silver_customers")
-bad_customers.write.format("delta").mode("overwrite").saveAsTable("quarantine_customers")
+good_customers.drop("quarantine_reason").write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_customers")
+bad_customers.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("quarantine_customers")
 
 row_count_out = good_customers.count()
 quarantined_count = bad_customers.count()

@@ -36,8 +36,8 @@ validated = deduped.withColumn(
 good_products = validated.filter(col("quarantine_reason") == "")
 bad_products = validated.filter(col("quarantine_reason") != "")
 
-good_products.drop("quarantine_reason").write.format("delta").mode("overwrite").saveAsTable("silver_products")
-bad_products.write.format("delta").mode("overwrite").saveAsTable("quarantine_products")
+good_products.drop("quarantine_reason").write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_products")
+bad_products.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("quarantine_products")
 
 row_count_out = good_products.count()
 quarantined_count = bad_products.count()

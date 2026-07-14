@@ -38,7 +38,7 @@ all_orphans = customer_orphans.union(product_orphans)
 quarantined_count = all_orphans.count()
 
 if quarantined_count > 0:
-    all_orphans.write.format("delta").mode("overwrite").saveAsTable("quarantine_fact_orders")
+    all_orphans.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("quarantine_fact_orders")
 
 # ---- Build fact table (only rows with valid dimension keys survive the joins anyway) ----
 fact = (
