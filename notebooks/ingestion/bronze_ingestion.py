@@ -9,6 +9,7 @@
 import uuid
 from datetime import datetime
 from pyspark.sql.functions import lit, current_timestamp, col, max as spark_max
+from functools import reduce
 
 run_id = str(uuid.uuid4())
 ingestion_ts = datetime.now().isoformat()
@@ -16,6 +17,7 @@ ingestion_ts = datetime.now().isoformat()
 BASE_PATH = "/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/data/landing"
 
 # ---------- CUSTOMERS (JSON) ----------
+print("\nIngesting Customers")
 start_time = log_step_start(run_id, "bronze_customers")
 
 customers_df = (
@@ -45,26 +47,26 @@ log_step_end(
     quarantined_count=0)
 
 # ---------- ORDERS (CSV) ----------
+print("\nIngesting Orders")
 start_time = log_step_start(run_id, "bronze_orders")
 
-orders_df = (
-    spark.read
-    .option("header", True)
-    .option("inferSchema", True)
-    .csv(f"{BASE_PATH}/orders_*.csv")
-)
-
-# Validate schema before adding metadata columns
-validate_schema(orders_df, ORDERS_REQUIRED, "orders")
+# Read all CSV files in the orders directory and union with schema reconciliation
+file_list = [f.path for f in dbutils.fs.ls(f"{BASE_PATH}/orders") if f.name.startswith("orders_") and f.name.endswith(".csv")]
+dfs = []
+for f in file_list:
+    df = spark.read.option("header", True).option("inferSchema", True).csv(f)
+    validate_schema(df, ORDERS_REQUIRED, f"orders ({f})")  # validate before merging
+    df = df.withColumn("source_file", lit(f))
+    dfs.append(df)
+orders_df = reduce(lambda df1, df2: df1.unionByName(df2, allowMissingColumns=True), dfs)
 
 orders_df = (
     orders_df
     .withColumn("run_id", lit(run_id))
     .withColumn("ingestion_ts", lit(ingestion_ts))
-    .withColumn("source_file", col("_metadata.file_path"))
 )
 
-orders_df.write.format("delta").mode("append").saveAsTable("bronze_orders")
+orders_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable("bronze_orders")
 row_count_out = orders_df.count()
 print(f"Bronze orders: {orders_df.count()} rows")
 
@@ -91,6 +93,7 @@ log_step_end(
 # print(f"\nRun ID: {run_id}")
 
 # ---------- PRODUCTS (Incremental) ----------
+print("\nIngesting Products")
 start_time = log_step_start(run_id, "bronze_products")
 
 # Get last successful watermark for products
@@ -102,7 +105,7 @@ watermark_row = spark.sql("""
 
 last_watermark = watermark_row[0]["last_watermark"] if watermark_row else "1900-01-01T00:00:00"
 
-print(f"\nLast watermark for products: {last_watermark}")
+print(f"Last watermark for products: {last_watermark}")
 
 # Read full source, then filter to only changed rows
 products_source = (
@@ -132,7 +135,7 @@ if new_row_count > 0:
 
     spark.sql(f"""
         INSERT INTO pipeline_watermarks VALUES (
-            'products', '{new_watermark}', current_timestamp()
+            "products", "{new_watermark}", current_timestamp()
         )
     """)
     print(f"Watermark updated to: {new_watermark}")

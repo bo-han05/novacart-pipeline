@@ -22,6 +22,11 @@ deduped = (
     .drop("rn")
 )
 
+# Validate if city and country exist
+address_fields = {f.name for f in deduped.schema["address"].dataType.fields}
+if not {"city", "country"}.issubset(address_fields):
+    raise Exception(f"SCHEMA VALIDATION FAILED: address missing required fields. Found: {address_fields}")
+
 # Flatten nested address ----
 flattened = deduped.select(
     "customer_id", "first_name", "last_name", "email",
