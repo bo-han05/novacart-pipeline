@@ -2,13 +2,13 @@
 
 A re-runnable ETL pipeline built on Databricks and Delta Lake, implementing a Bronze/Silver/Gold lakehouse architecture with SCD1/SCD2 dimensions, schema drift handling, and full observability.
 
-## Architecture
+### Architecture
 - `fact_orders` — transactions
 - `dim_customer` — SCD2 (history preserved)
 - `dim_product` — SCD1 (overwrite)
 - `dim_date` — calendar
 
-## Setup
+### Setup
 1. Clone into Databricks Repos
 2. Ensure source data exists in `data/landing/` within the repo:
    - `customers.json` — nested customer records
@@ -16,24 +16,24 @@ A re-runnable ETL pipeline built on Databricks and Delta Lake, implementing a Br
    - `products.csv` — extracted from source SQLite database (`products.db`)
 3. Update `BASE_PATH` in `notebooks/ingestion/bronze_ingestion.py`
 
-## Run
+### Run
 **Single command:** Workflows → Jobs → **novacart-pipeline** → Run Now
 
 Reset for demo: run `notebooks/reset_pipeline.py`
 
-#### Tests
+### Tests
 Run each notebook in `notebooks/tests/` individually — all print `TEST PASSED`:
 happy path, duplicates, quarantine, additive/subtractive schema drift, idempotency, backfill
 
-#### Observability
+### Observability
 Query `pipeline_runs` and `pipeline_run_steps` for status, duration, row counts, and errors.
 
-#### Data Quality
+### Data Quality
 Bad rows are quarantined (never dropped) in `quarantine_orders/customers/products/fact_orders`, each with a reason.
 
-#### Schema Drift
+### Schema Drift
 - New column → warning, pipeline continues
 - Missing required column → exception, pipeline stops
 
-#### Idempotency & Incremental Loading
+### Idempotency & Incremental Loading
 Reruns produce identical output. Products load incrementally via `updated_at` watermark.
