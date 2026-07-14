@@ -21,8 +21,8 @@ A re-runnable ETL pipeline built on Databricks and Delta Lake, implementing a Br
 
 The Job executes the full pipeline in order:
 - `bronze_ingestion`
-- `silver_customers`
 - `silver_orders`
+- `silver_customers`
 - `silver_products`
 - `gold_dim_date`
 - `gold_dim_customer`
