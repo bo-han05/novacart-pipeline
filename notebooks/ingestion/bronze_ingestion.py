@@ -1,5 +1,11 @@
 # Bronze Layer Ingestion: Customers, Orders, Products
 
+%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper
+
+%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/schema_definitions
+
+%run /Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/schema_validator
+
 import uuid
 from datetime import datetime
 from pyspark.sql.functions import lit, current_timestamp, col, max as spark_max
@@ -10,30 +16,64 @@ ingestion_ts = datetime.now().isoformat()
 BASE_PATH = "/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/data/landing"
 
 # ---------- CUSTOMERS (JSON) ----------
+start_time = log_step_start(run_id, "bronze_customers")
+
 customers_df = (
     spark.read
     .option("multiLine", True)
     .json(f"{BASE_PATH}/customers/customers.json")
+)
+
+# Validate schema before adding metadata columns
+validate_schema(customers_df, CUSTOMERS_REQUIRED, "customers")
+
+customers_df = (
+    customers_df
     .withColumn("run_id", lit(run_id))
     .withColumn("ingestion_ts", lit(ingestion_ts))
 )
 
 customers_df.write.format("delta").mode("append").saveAsTable("bronze_customers")
-print(f"Bronze customers: {customers_df.count()} rows")
+row_count_out=customers_df.count()
+print(f"Bronze customers: {row_count_out} rows")
+
+# ---- End logging ----
+log_step_end(
+    run_id, "bronze_customers", start_time,
+    row_count_in=row_count_out,
+    row_count_out=row_count_out,
+    quarantined_count=0)
 
 # ---------- ORDERS (CSV) ----------
+start_time = log_step_start(run_id, "bronze_orders")
+
 orders_df = (
     spark.read
     .option("header", True)
     .option("inferSchema", True)
-    .csv(f"{BASE_PATH}/orders/*.csv")
+    .csv(f"{BASE_PATH}/orders_*.csv")
+)
+
+# Validate schema before adding metadata columns
+validate_schema(orders_df, ORDERS_REQUIRED, "orders")
+
+orders_df = (
+    orders_df
     .withColumn("run_id", lit(run_id))
     .withColumn("ingestion_ts", lit(ingestion_ts))
     .withColumn("source_file", col("_metadata.file_path"))
 )
 
 orders_df.write.format("delta").mode("append").saveAsTable("bronze_orders")
+row_count_out = orders_df.count()
 print(f"Bronze orders: {orders_df.count()} rows")
+
+# ---- End logging ----
+log_step_end(
+    run_id, "bronze_orders", start_time,
+    row_count_in=row_count_out,
+    row_count_out=row_count_out,
+    quarantined_count=0)
 
 # ---------- PRODUCTS (CSV, exported from SQLite) ----------
 # products_df = (
@@ -48,9 +88,11 @@ print(f"Bronze orders: {orders_df.count()} rows")
 # products_df.write.format("delta").mode("append").saveAsTable("bronze_products")
 # print(f"Bronze products: {products_df.count()} rows")
 
-print(f"\nRun ID: {run_id}")
+# print(f"\nRun ID: {run_id}")
 
 # ---------- PRODUCTS (Incremental) ----------
+start_time = log_step_start(run_id, "bronze_products")
+
 # Get last successful watermark for products
 watermark_row = spark.sql("""
     SELECT last_watermark FROM pipeline_watermarks 
@@ -69,6 +111,8 @@ products_source = (
     .option("inferSchema", True)
     .csv(f"{BASE_PATH}/products/products.csv")
 )
+
+validate_schema(products_source, PRODUCTS_REQUIRED, "products")
 
 products_df = (
     products_source
@@ -94,6 +138,13 @@ if new_row_count > 0:
     print(f"Watermark updated to: {new_watermark}")
 else:
     print("No new products to ingest — watermark unchanged")
+
+# ---- End logging ----
+log_step_end(
+    run_id, "bronze_products", start_time,
+    row_count_in=new_row_count,
+    row_count_out=new_row_count,
+    quarantined_count=0)
 
 # Verify tables landed in bronze layer correctly
 print("\nCustomers:", spark.table("bronze_customers").count())
