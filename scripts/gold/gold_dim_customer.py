@@ -1,6 +1,6 @@
 # Gold Layer: dim_customer (SCD2)
 
-exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/logging_helper.py").read())
 
 from delta.tables import DeltaTable
 from pyspark.sql.functions import col, lit, current_timestamp

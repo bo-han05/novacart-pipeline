@@ -1,8 +1,8 @@
 # Bronze Layer Ingestion: Customers, Orders, Products
 
-exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/logging_helper.py").read())
-exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/schema_definitions.py").read())
-exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/notebooks/utils/schema_validator.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/logging_helper.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/schema_definitions.py").read())
+exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/schema_validator.py").read())
 
 import uuid
 from datetime import datetime

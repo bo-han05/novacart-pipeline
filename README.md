@@ -14,12 +14,13 @@ A re-runnable ETL pipeline built on Databricks and Delta Lake, implementing a Br
    - `customers.json` — nested customer records
    - `orders/*.csv` — daily order files
    - `products.csv` — extracted from source SQLite database (`products.db`)
-3. Update `BASE_PATH` in `notebooks/ingestion/bronze_ingestion.py`
+3. Update `BASE_PATH` in `scripts/ingestion/bronze_ingestion.py`
 
 ### Run
 **Single command:** Workflows → Jobs → **novacart-pipeline** → Run Now
 
 The Job executes the full pipeline in order:
+- `setup_metadata`
 - `bronze_ingestion`
 - `silver_orders`
 - `silver_customers`
@@ -29,10 +30,10 @@ The Job executes the full pipeline in order:
 - `gold_dim_product`
 - `gold_fact_orders`
 
-Reset for demo: run `notebooks/reset_pipeline.py`
+Reset for demo: run `scripts/reset_pipeline.py`
 
 ### Tests
-Run each notebook in `notebooks/tests/` individually — all print `TEST PASSED`:
+Run each notebook in `scripts/tests/` individually — all print `TEST PASSED`:
 happy path, duplicates, quarantine, additive/subtractive schema drift, idempotency, backfill
 
 ### Observability
