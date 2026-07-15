@@ -3,9 +3,11 @@
 exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/logging_helper.py").read())
 
 from pyspark.sql.functions import col, explode, sequence, to_date, year, month, dayofmonth, weekofyear, quarter, dayofweek, date_format
-import uuid
+# import uuid
 
-run_id = str(uuid.uuid4())
+run_id = dbutils.jobs.taskValues.get(taskKey="job_start", key="pipeline_run_id")
+## uncomment if running separately
+# run_id = str(uuid.uuid4())
 start_time = log_step_start(run_id, "gold_dim_date")
 
 date_range = spark.sql("""

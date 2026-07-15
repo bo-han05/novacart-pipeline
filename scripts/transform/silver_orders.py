@@ -4,11 +4,13 @@ exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/loggin
 
 from pyspark.sql.functions import col, when, concat_ws, lit, row_number, current_date, round as spark_round
 from pyspark.sql.window import Window
-import uuid
+# import uuid
 
 VALID_STATUSES = {"pending", "shipped", "delivered", "refunded"}
 
-run_id = str(uuid.uuid4())
+run_id = dbutils.jobs.taskValues.get(taskKey="job_start", key="pipeline_run_id")
+## uncomment if running separately
+# run_id = str(uuid.uuid4())
 start_time = log_step_start(run_id, "silver_orders")
 
 bronze_orders = spark.table("bronze_orders")

@@ -4,12 +4,14 @@ exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/loggin
 exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/schema_definitions.py").read())
 exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/schema_validator.py").read())
 
-import uuid
+# import uuid
 from datetime import datetime
 from pyspark.sql.functions import lit, current_timestamp, col, max as spark_max
 from functools import reduce
 
-run_id = str(uuid.uuid4())
+run_id = dbutils.jobs.taskValues.get(taskKey="job_start", key="pipeline_run_id")
+## uncomment if running separately
+# run_id = str(uuid.uuid4())
 ingestion_ts = datetime.now().isoformat()
 
 BASE_PATH = "/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/data/landing"

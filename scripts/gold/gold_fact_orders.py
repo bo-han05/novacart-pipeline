@@ -4,9 +4,11 @@ exec(open("/Workspace/Repos/hanbo@ibm.com/novacart-pipeline/scripts/utils/loggin
 
 from delta.tables import DeltaTable
 from pyspark.sql.functions import col, date_format, lit
-import uuid
+# import uuid
 
-run_id = str(uuid.uuid4())
+run_id = dbutils.jobs.taskValues.get(taskKey="job_start", key="pipeline_run_id")
+## uncomment if running separately
+# run_id = str(uuid.uuid4())
 start_time = log_step_start(run_id, "gold_fact_orders")
 
 silver_orders = spark.table("silver_orders")
