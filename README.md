@@ -20,6 +20,7 @@ A re-runnable ETL pipeline built on Databricks and Delta Lake, implementing a Br
 **Single command:** Workflows → Jobs → **novacart-pipeline** → Run Now
 
 The Job executes the full pipeline in order:
+- `job_start`
 - `setup_metadata`
 - `bronze_ingestion`
 - `silver_orders`
@@ -29,6 +30,7 @@ The Job executes the full pipeline in order:
 - `gold_dim_customer`
 - `gold_dim_product`
 - `gold_fact_orders`
+- `job_end`
 
 Reset for demo: run `scripts/reset_pipeline.py`
 
