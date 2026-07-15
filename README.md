@@ -33,7 +33,7 @@ The Job executes the full pipeline in order:
 Reset for demo: run `scripts/reset_pipeline.py`
 
 ### Tests
-Run each notebook in `scripts/tests/` individually — all print `TEST PASSED`:
+Run each script in `scripts/tests/` individually — all print `TEST PASSED`:
 happy path, duplicates, quarantine, additive/subtractive schema drift, idempotency, backfill
 
 ### Observability
