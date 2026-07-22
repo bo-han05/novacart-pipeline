@@ -14,7 +14,7 @@ A re-runnable ETL pipeline built on Databricks and Delta Lake, implementing a Br
    - `customers.json` — nested customer records
    - `orders/*.csv` — daily order files
    - `products.csv` — extracted from source SQLite database (`products.db`)
-3. Update `BASE_PATH` in `scripts/ingestion/bronze_ingestion.py`
+3. Update `BASE_PATH` in `scripts/ingestion/bronze_ingestion.py` and any other hardcoded file paths across the pipeline scripts to match your Databricks Repos path.
 
 ### Run
 **Single command:** Workflows → Jobs → **novacart-pipeline** → Run Now
